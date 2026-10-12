@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Salida de mercadería</title>
+  <style>
+    @import url("salidaMercaderia.css");
+  </style>
+</head>
+<body>
+  <div class="tarjeta">
+    <h1>Despacho de mercadería</h1>
+
+    <div>
+      <label for="bodega">Bodega Emisora</label>
+      <select id="bodega"></select>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Presentación</th>
+          <th>Cantidad</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="lineas"></tbody>
+    </table>
+
+    <button type="button" id="btnAgregar" class="btn-secundario">+ Agregar producto</button>
+
+    <div class="acciones">
+      <button type="button" id="btnGuardar" class="btn-primario">Registrar salida</button>
+      <button type="button" id="btnLimpiar" class="btn-secundario">Limpiar</button>
+    </div>
+
+    <div id="mensaje"></div>
+  </div>
+
+  <script src="../api.js"></script>
+  <script src="salidaMercaderia.js"></script>
+</body>
+</html>

@@ -1,0 +1,179 @@
+/* ===== Variables de diseño ===== */
+:root {
+  --fondo: #f4f6f9;
+  --tarjeta: #ffffff;
+  --borde: #e5e7eb;
+  --borde-input: #d1d5db;
+  --texto: #111827;
+  --texto-suave: #6b7280;
+  --acento: #1e3a5f;
+  --acento-hover: #162c48;
+  --acento-suave: rgba(30, 58, 95, .15);
+  --ok-fondo: #ecfdf3;
+  --ok-texto: #067647;
+  --error-fondo: #fef3f2;
+  --error-texto: #b42318;
+  --radio: 8px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+/* ===== Contenido a todo el ancho ===== */
+.contenido {
+  width: 100%;
+  padding: 40px 48px 56px;
+}
+
+.encabezado-pagina { margin-bottom: 28px; }
+
+h1 {
+  font-size: 1.625rem;
+  font-weight: 600;
+  letter-spacing: -.02em;
+}
+
+.encabezado-pagina p {
+  margin-top: 4px;
+  color: var(--texto-suave);
+  font-size: .95rem;
+}
+
+/* ===== Tarjeta ===== */
+.tarjeta {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+  padding: 28px 32px 32px;
+}
+
+h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: -.01em;
+  padding-bottom: 20px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--borde);
+}
+
+/* ===== Formulario: ocupa todo el ancho ===== */
+.grilla {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+label {
+  display: block;
+  font-size: .8125rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+input, select {
+  width: 100%;
+  height: 42px;
+  padding: 0 12px;
+  font: inherit;
+  color: var(--texto);
+  background: #fff;
+  border: 1px solid var(--borde-input);
+  border-radius: var(--radio);
+  transition: border-color .15s, box-shadow .15s;
+}
+
+input::placeholder { color: #9ca3af; }
+input:hover, select:hover { border-color: #9ca3af; }
+
+input:focus, select:focus {
+  outline: none;
+  border-color: var(--acento);
+  box-shadow: 0 0 0 3px var(--acento-suave);
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  padding-right: 36px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+/* ===== Botón ===== */
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--borde);
+}
+
+button {
+  height: 42px;
+  padding: 0 24px;
+  font: inherit;
+  font-weight: 500;
+  color: #fff;
+  background: var(--acento);
+  border: 1px solid transparent;
+  border-radius: var(--radio);
+  cursor: pointer;
+  transition: background .15s, box-shadow .15s;
+}
+
+button:hover:not(:disabled) { background: var(--acento-hover); }
+
+button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--acento-suave);
+}
+
+button:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ===== Respuesta de la API ===== */
+#respuestaApi {
+  margin-top: 24px;
+  padding: 12px 14px;
+  border-radius: var(--radio);
+  font-size: .875rem;
+  background: #f9fafb;
+  color: #374151;
+  border-left: 3px solid var(--borde-input);
+}
+
+#respuestaApi:empty { display: none; }
+
+#respuestaApi.ok,
+#respuestaApi.exito {
+  background: var(--ok-fondo);
+  color: var(--ok-texto);
+  border-left-color: var(--ok-texto);
+}
+
+#respuestaApi.error {
+  background: var(--error-fondo);
+  color: var(--error-texto);
+  border-left-color: var(--error-texto);
+}
+
+/* ===== Pantallas pequeñas ===== */
+@media (max-width: 700px) {
+  .contenido { padding: 24px 16px 40px; }
+  .tarjeta { padding: 22px; }
+}

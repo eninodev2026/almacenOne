@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Bodegas</title>
+  <link rel="stylesheet" href="bodegas.css">
+</head>
+<body>
+  <div class="contenedor">
+
+    <!-- Formulario para crear una bodega -->
+    <section class="tarjeta">
+      <h1>Crear bodega</h1>
+      <p class="ayuda">
+        Una bodega es un lugar físico donde se guarda la mercadería.
+        La dirección es opcional.
+      </p>
+
+      <div class="grilla">
+        <div class="campo">
+          <label for="nombre">Nombre</label>
+          <input type="text" id="nombre" placeholder="Ej: Bodega central" autocomplete="off">
+        </div>
+
+        <div class="campo">
+          <label for="direccion">Dirección (opcional)</label>
+          <input type="text" id="direccion" placeholder="Ej: Col. Escalón, San Salvador" autocomplete="off">
+        </div>
+      </div>
+
+      <div class="acciones">
+        <button type="button" id="btnGuardar" class="btn-primario">Guardar bodega</button>
+        <button type="button" id="btnLimpiar" class="btn-secundario">Limpiar</button>
+      </div>
+
+      <div id="mensaje"></div>
+    </section>
+
+    <!-- Lista de bodegas existentes -->
+    <section class="tarjeta">
+      <div class="encabezado-lista">
+        <h2>Bodegas existentes</h2>
+      </div>
+
+      <div class="tabla-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Dirección</th>
+            </tr>
+          </thead>
+          <tbody id="tablaBodegas"></tbody>
+        </table>
+      </div>
+      <p id="sinDatos" class="ayuda" hidden>No hay bodegas para mostrar.</p>
+    </section>
+
+  </div>
+  <script src="../api.js"></script>
+  <script src="bodegas.js"></script>
+</body>
+</html>

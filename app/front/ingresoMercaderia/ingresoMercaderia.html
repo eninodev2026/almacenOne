@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ingreso de mercadería</title>
+  <link rel="stylesheet" href="ingresoMercaderia.css">
+</head>
+<body>
+  <div class="contenedor">
+
+    <section class="tarjeta">
+      <h1>Ingreso de mercadería (compra)</h1>
+      <p class="ayuda">Registra la factura del proveedor manualmente o importa el JSON del DTE (Factura Electrónica).</p>
+
+      <!-- NUEVA SECCIÓN: IMPORTAR DTE -->
+      <div class="importar-dte-box">
+        <input type="file" id="archivoJson" accept=".json" style="display: none;">
+        <button type="button" id="btnSeleccionarJson" class="btn-terciario">📄 Seleccionar archivo JSON (DTE)</button>
+        <span id="nombreArchivoJson" class="nombre-archivo">Ningún archivo seleccionado</span>
+        <button type="button" id="btnImportarJson" class="btn-primario" disabled>Importar datos</button>
+      </div>
+      <hr class="separador">
+
+      <div class="grilla">
+        <div class="campo">
+          <label for="proveedor">Proveedor</label>
+          <select id="proveedor"></select>
+        </div>
+
+        <div class="campo">
+          <label for="bodega">Bodega de destino</label>
+          <select id="bodega"></select>
+        </div>
+
+        <div class="campo">
+          <label for="numeroFactura">Número de factura (o Control DTE)</label>
+          <input type="text" id="numeroFactura" placeholder="Ej: DTE-03-M001P001-000000000000064">
+        </div>
+
+        <div class="campo">
+          <label for="condicionPago">Condición de pago</label>
+          <input type="text" id="condicionPago" list="opcionesCondicion" value="Contado">
+          <datalist id="opcionesCondicion">
+            <option value="Contado"></option>
+            <option value="Crédito"></option>
+          </datalist>
+        </div>
+
+        <div class="campo">
+          <label for="fechaEmision">Fecha de emisión (en la factura)</label>
+          <input type="date" id="fechaEmision">
+        </div>
+
+        <div class="campo">
+          <label for="fechaCompra">Fecha de compra (de ingreso)</label>
+          <input type="date" id="fechaCompra">
+        </div>
+
+        <div class="campo ancho-completo">
+          <label for="observacion">Observación (opcional)</label>
+          <input type="text" id="observacion" placeholder="Ej: entrega parcial o Código Generación DTE">
+        </div>
+      </div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Productos de la factura</h2>
+
+      <div class="tabla-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Presentación</th>
+              <th>Cantidad</th>
+              <th>Precio unitario ($)</th>
+              <th>Descuento ($)</th>
+              <th>Entra al inventario</th>
+              <th class="num">Total línea</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="lineas"></tbody>
+        </table>
+      </div>
+
+      <button type="button" id="btnAgregar" class="btn-secundario">+ Agregar producto</button>
+
+      <div class="totales">
+        <div><span>Subtotal</span><strong id="totSubtotal">$0.00</strong></div>
+        <div><span>Descuento</span><strong id="totDescuento">$0.00</strong></div>
+        <div><span>IVA (13%)</span><strong id="totIva">$0.00</strong></div>
+        <div class="gran-total"><span>Total</span><strong id="totTotal">$0.00</strong></div>
+        <small>Estimado. El servidor calcula el total final al guardar.</small>
+      </div>
+
+      <div class="acciones">
+        <button type="button" id="btnGuardar" class="btn-primario">Registrar compra</button>
+        <button type="button" id="btnLimpiar" class="btn-secundario">Limpiar</button>
+      </div>
+
+      <div id="mensaje"></div>
+    </section>
+
+  </div>
+
+  <script src="../api.js"></script>
+  <script src="ingresoMercaderia.js"></script>
+</body>
+</html>

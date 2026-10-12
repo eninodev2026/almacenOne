@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Consulta de Inventario</title>
+  <link rel="stylesheet" href="inventario.css">
+</head>
+<body>
+  <div class="contenedor">
+
+    <section class="tarjeta">
+      <h1>Consulta de Inventario</h1>
+      <p class="ayuda">Busca productos, filtra por bodega, fechas y stock. Los resultados aparecen automáticamente.</p>
+
+      <div class="filtros-principales">
+        <div class="campo-busqueda">
+          <input type="text" id="buscar" placeholder="🔍 Buscar por nombre de producto, código o descripción..." autocomplete="off">
+          <span id="spinner" class="spinner oculto"></span>
+        </div>
+      </div>
+
+      <button type="button" id="btnMostrarFiltros" class="btn-link">
+        <span id="iconoFiltros">▼</span> Filtros avanzados
+      </button>
+
+      <div id="filtrosAvanzados" class="filtros-avanzados oculto">
+        <div class="grilla-filtros">
+          <div class="campo">
+            <label for="filtroBodega">Bodega</label>
+            <select id="filtroBodega">
+              <option value="">Todas las bodegas</option>
+            </select>
+          </div>
+
+          <div class="campo">
+            <label for="filtroStockMin">Stock mínimo</label>
+            <input type="number" id="filtroStockMin" min="0" step="any" placeholder="0">
+          </div>
+
+          <div class="campo">
+            <label for="filtroStockMax">Stock máximo</label>
+            <input type="number" id="filtroStockMax" min="0" step="any" placeholder="∞">
+          </div>
+
+          <div class="campo">
+            <label for="filtroFechaDesde">Última movimentación desde</label>
+            <input type="date" id="filtroFechaDesde">
+          </div>
+
+          <div class="campo">
+            <label for="filtroFechaHasta">Última movimentación hasta</label>
+            <input type="date" id="filtroFechaHasta">
+          </div>
+
+          <div class="campo">
+            <label for="filtroDiasBodega">Días en bodega (máximo)</label>
+            <input type="number" id="filtroDiasBodega" min="0" placeholder="Ej: 30">
+          </div>
+        </div>
+
+        <div class="acciones-filtros">
+          <button type="button" id="btnLimpiarFiltros" class="btn-secundario">Limpiar filtros</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="tarjeta" id="seccionResultados">
+      <div class="encabezado-resultados">
+        <h2>Resultados <span id="contadorResultados" class="contador"></span></h2>
+        <div class="resumen-stock">
+          <div class="stat">
+            <span class="stat-label">Productos encontrados</span>
+            <span class="stat-value" id="statProductos">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Unidades totales</span>
+            <span class="stat-value" id="statUnidades">0</span>
+          </div>
+          <div class="stat">
+            <span class="stat-label">Valor estimado</span>
+            <span class="stat-value" id="statValor">$0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin: 12px 0;">
+        <button type="button" id="btnDescargarExcel" class="btn-secundario">📥 Descargar reporte en Excel</button>
+      </div>
+
+      <div class="tabla-scroll">
+        <table id="tablaInventario">
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Presentación</th>
+              <th>Bodega</th>
+              <th class="num">Stock</th>
+              <th class="num">Costo Unit.</th>
+              <th class="num">Valor Total</th>
+              <th class="num">Días en Bodega</th>
+              <th>Última Movimentación</th>
+            </tr>
+          </thead>
+          <tbody id="cuerpoTabla"></tbody>
+        </table>
+      </div>
+
+      <div id="mensajeEstado" class="mensaje-estado">
+        Escribe algo en el buscador o ajusta los filtros para ver resultados.
+      </div>
+    </section>
+
+  </div>
+
+  <script src="../api.js"></script>
+  <script src="inventario.js"></script>
+</body>
+</html>

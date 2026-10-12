@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Categorías - Sistema de Inventario</title>
+  <link rel="stylesheet" href="categorias.css">
+</head>
+<body>
+  <div class="contenido">
+
+    <header class="encabezado-pagina">
+      <a href="../dashboard/dashboard.html" style="color:var(--texto-suave); font-size:.875rem; text-decoration:none;">← Volver al dashboard</a>
+      <h1 style="margin-top:8px;">Categorías</h1>
+      <p>Clasificar productos</p>
+    </header>
+
+    <section class="tarjeta" id="seccionFormulario" style="margin-bottom:24px;">
+      <h2>Nueva categoría</h2>
+      <div class="grilla">
+        <div>
+          <label for="nombreCategoria">Nombre</label>
+          <input id="nombreCategoria" type="text" maxlength="100" placeholder="Ej. Bebidas">
+        </div>
+      </div>
+      <div class="acciones">
+        <button id="btnGuardar" type="button">Guardar categoría</button>
+      </div>
+      <div id="respuestaApi"></div>
+    </section>
+
+    <section class="tarjeta">
+      <h2>Categorías registradas (<span id="totalCategorias">0</span>)</h2>
+      <ul id="listaCategorias" style="list-style:none;"></ul>
+    </section>
+
+  </div>
+
+  <script src="../api.js"></script>
+  <script src="categorias.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Anulación de salidas</title>
+  <style>
+    @import url("anularSalidas.css");
+  </style>
+</head>
+<body>
+  <div class="tarjeta">
+    <h1>Anulación de salidas</h1>
+
+    <div class="filtro">
+      <label for="filtroEstado">Mostrar</label>
+      <select id="filtroEstado">
+        <option value="TODAS">Todas</option>
+        <option value="ACTIVO">Solo activas</option>
+        <option value="ANULADO">Solo anuladas</option>
+      </select>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>N.º</th>
+          <th>Fecha</th>
+          <th>Bodega</th>
+          <th class="col-numero">Productos</th>
+          <th>Estado</th>
+          <th>Anulación</th>
+        </tr>
+      </thead>
+      <tbody id="filas"></tbody>
+    </table>
+
+    <div id="mensaje"></div>
+  </div>
+
+  <!-- Ventana para pedir el motivo y confirmar -->
+  <div id="modal" class="modal-fondo">
+    <div class="modal">
+      <h2 id="modalTitulo">Anular salida</h2>
+      <p class="modal-aviso">
+        Esta acción devuelve al stock de la bodega lo que salió y no se puede deshacer.
+      </p>
+
+      <label for="motivo">Motivo de la anulación</label>
+      <textarea id="motivo" rows="3" maxlength="500"
+                placeholder="Escribe por qué se anula (mínimo 5 caracteres)"></textarea>
+
+      <div id="modalError"></div>
+
+      <div class="acciones">
+        <button type="button" id="btnConfirmar" class="btn-peligro">Confirmar anulación</button>
+        <button type="button" id="btnCancelar" class="btn-secundario">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="../api.js"></script>
+  <script src="anularSalidas.js"></script>
+</body>
+</html>

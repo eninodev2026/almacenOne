@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="proveedores.css">
+    <title>Registro de proveedores</title>
+</head>
+<body>
+
+    <div class="container">
+
+        <h1>Registro de proveedores</h1>
+
+        <form id="frmProveedores">
+
+            <div class="campo">
+                <label for="nombre">Nombre / Razón social</label>
+                <input type="text" id="nombre" name="nombre" placeholder="Ej: Distribuidora El Sol S.A. de C.V." required>
+            </div>
+
+            <div class="campo-grupo">
+                <div class="campo">
+                    <label for="nit">NIT</label>
+                    <input type="text" id="nit" name="nit" placeholder="Ej: 06142309171030">
+                </div>
+
+                <div class="campo">
+                    <label for="nrc">NRC</label>
+                    <input type="text" id="nrc" name="nrc" placeholder="Ej: 2673351">
+                </div>
+            </div>
+
+            <div class="campo-grupo">
+                <div class="campo">
+                    <label for="telefono">Teléfono</label>
+                    <input type="text" id="telefono" name="telefono" placeholder="Ej: 2222-3333">
+                </div>
+
+                <div class="campo">
+                    <label for="correo">Correo electrónico</label>
+                    <input type="email" id="correo" name="correo" placeholder="Ej: contacto@proveedor.com">
+                </div>
+            </div>
+
+            <div class="campo">
+                <label for="direccion">Dirección</label>
+                <input type="text" id="direccion" name="direccion" placeholder="Ej: Col. Centro, Calle Principal #123">
+            </div>
+
+            <button type="submit">Registrar proveedor</button>
+
+        </form>
+
+        <p id="respuestaApi"></p>
+
+    </div>
+
+    <script src="../api.js"></script>
+    <script src="proveedores.js"></script>
+
+</body>
+</html>
