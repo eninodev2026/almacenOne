@@ -1,0 +1,259 @@
+/* Pantalla "Traslados".
+   Los colores están agrupados en :root para cambiarlos en un solo lugar. */
+
+:root {
+  --fondo: #f5f7fa;
+  --tarjeta: #ffffff;
+  --borde: #e4e7ec;
+  --borde-campo: #d0d5dd;
+  --texto: #1d2939;
+  --texto-suave: #667085;
+  --primario: #1f3a5f;
+  --primario-hover: #172c48;
+  --fila-hover: #eef2f7;
+  --ok-fondo: #ecfdf3;
+  --ok-texto: #067647;
+  --error-fondo: #fef3f2;
+  --error-texto: #b42318;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  color: var(--texto);
+  font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+  font-size: 15px;
+}
+
+/* La pantalla usa todo el ancho de la página */
+.contenedor {
+  width: 100%;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.tarjeta {
+  background: var(--tarjeta);
+  border: 1px solid var(--borde);
+  border-radius: 12px;
+  padding: 28px 32px;
+}
+
+h1 {
+  margin: 0 0 8px;
+  font-size: 22px;
+}
+
+h2 {
+  margin: 0;
+  font-size: 17px;
+}
+
+.ayuda {
+  margin: 0 0 20px;
+  max-width: 560px;
+  color: var(--texto-suave);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ---------- Formulario ---------- */
+.grilla {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.campo label {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.campo input,
+.campo select {
+  height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--borde-campo);
+  border-radius: 8px;
+  font: inherit;
+  color: var(--texto);
+  background: #fff;
+}
+
+.campo input:focus,
+.campo select:focus {
+  outline: none;
+  border-color: var(--primario);
+  box-shadow: 0 0 0 3px rgba(31, 58, 95, 0.15);
+}
+
+/* ---------- Botones ---------- */
+.acciones {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--borde);
+}
+
+.acciones button {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 8px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primario {
+  background: var(--primario);
+  border: 1px solid var(--primario);
+  color: #fff;
+}
+
+.btn-primario:hover:not(:disabled) {
+  background: var(--primario-hover);
+}
+
+.btn-primario:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-secundario {
+  background: #fff;
+  border: 1px solid var(--borde-campo);
+  color: var(--texto);
+}
+
+.btn-secundario:hover {
+  background: var(--fila-hover);
+}
+
+/* Botón pequeño para quitar una línea del traslado */
+.btn-quitar {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--borde-campo);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--error-texto);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-quitar:hover {
+  background: var(--error-fondo);
+}
+
+/* ---------- Mensajes (el JS les pone la clase "ok" o "error") ---------- */
+#mensaje:empty {
+  display: none;
+}
+
+#mensaje {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+#mensaje.ok {
+  background: var(--ok-fondo);
+  color: var(--ok-texto);
+}
+
+#mensaje.error {
+  background: var(--error-fondo);
+  color: var(--error-texto);
+}
+
+/* ---------- Tabla de líneas ---------- */
+.encabezado-lista {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.tabla-scroll {
+  overflow: visible;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th {
+  padding: 12px;
+  background: #f9fafb;
+  border-bottom: 1px solid var(--borde);
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--texto-suave);
+}
+
+td {
+  padding: 14px 12px;
+  border-bottom: 1px solid var(--borde);
+}
+
+tbody tr:hover {
+  background: var(--fila-hover);
+}
+
+.sin-lineas {
+  padding: 20px 12px;
+  color: var(--texto-suave);
+  font-size: 14px;
+}
+
+/* ---------- Pantallas pequeñas ---------- */
+@media (max-width: 700px) {
+  .contenedor {
+    padding: 16px;
+  }
+
+  .grilla {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Observaciones ---------- */
+.campo-observacion {
+  margin-top: 20px;
+}
+
+.campo textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--borde-campo);
+  border-radius: 8px;
+  font: inherit;
+  color: var(--texto);
+  background: #fff;
+  resize: vertical;
+}
+
+.campo textarea:focus {
+  outline: none;
+  border-color: var(--primario);
+  box-shadow: 0 0 0 3px rgba(31, 58, 95, 0.15);
+}

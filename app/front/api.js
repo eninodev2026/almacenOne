@@ -296,3 +296,95 @@ async function descargarReporteStock() {
 async function crearCategoria(datosIngresoCategoria) {
     return await enviarDatosALaApi("/categorias/", datosIngresoCategoria);
 }
+
+// Crea un traslado entre bodegas.
+// Recibe: { bodega_origen_id, bodega_destino_id, detalles: [{ presentacion_id, cantidad }] }
+async function crearTraslado(datosIngresoTraslado) {
+    return await enviarDatosALaApi("/traslados/", datosIngresoTraslado);
+}
+
+// Lista los traslados entre bodegas (reporte).
+// estado es opcional: "DESPACHADO", "RECIBIDO" o "RECHAZADO".
+async function cargarTraslados(estado) {
+    let ruta = "/traslados/";
+    if (estado) {
+        ruta = ruta + "?estado=" + encodeURIComponent(estado);
+    }
+    return await pedirListaALaApi(ruta);
+}
+
+// Resuelve un traslado DESPACHADO. accion: "recibir" o "rechazar".
+async function resolverTraslado(movimientoId, accion, observacion) {
+    const respuesta = await fetchApi(
+        "/traslados/" + movimientoId + "/" + accion,
+        {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ observacion: observacion || null })
+        }
+    );
+
+    const datosQueRespondioLaApi = await respuesta.json().catch(function () {
+        return null;
+    });
+
+    if (!respuesta.ok) {
+        throw new Error(leerMensajeDeError(datosQueRespondioLaApi));
+    }
+
+    return datosQueRespondioLaApi;
+}
+
+async function recibirTraslado(movimientoId, observacion) {
+    return await resolverTraslado(movimientoId, "recibir", observacion);
+}
+
+async function rechazarTraslado(movimientoId, observacion) {
+    return await resolverTraslado(movimientoId, "rechazar", observacion);
+}
+
+
+// ================== REPORTES (DESCARGA CENTRALIZADA) ==================
+
+// Descarga cualquier archivo que entregue la API (Excel, PDF...) y lo guarda con el nombre indicado.
+async function descargarArchivoDeLaApi(ruta, nombreArchivo) {
+    const respuesta = await fetchApi(ruta);
+
+    if (!respuesta.ok) {
+        const datosError = await respuesta.json().catch(function () {
+            return null;
+        });
+        throw new Error(leerMensajeDeError(datosError));
+    }
+
+    const archivo = await respuesta.blob();
+    const direccionTemporal = URL.createObjectURL(archivo);
+
+    const enlace = document.createElement("a");
+    enlace.href = direccionTemporal;
+    enlace.download = nombreArchivo;
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+
+    setTimeout(function () {
+        URL.revokeObjectURL(direccionTemporal);
+    }, 1000);
+}
+
+// Descarga el Excel de stock con una hoja por bodega (endpoint /reportes/stock-bodegas/excel)
+async function descargarReporteStockPorBodega() {
+    const hoy = new Date();
+    const fecha =
+        hoy.getFullYear() + "-" +
+        String(hoy.getMonth() + 1).padStart(2, "0") + "-" +
+        String(hoy.getDate()).padStart(2, "0");
+
+    await descargarArchivoDeLaApi("/reportes/stock-bodegas/excel", "stock_por_bodega_" + fecha + ".xlsx");
+}
+
+
+// Descarga el comprobante PDF de un traslado
+async function descargarComprobanteTraslado(movimientoId) {
+    await descargarArchivoDeLaApi("/traslados/" + movimientoId + "/pdf", "traslado_" + movimientoId + ".pdf");
+}

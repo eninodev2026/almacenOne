@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Gestión de reportes</title>
+    <link rel="stylesheet" href="gestionReportes.css">
+</head>
+<body>
+    <div class="rep-pagina">
+        <header class="rep-encabezado">
+            <div>
+                <h1 class="rep-titulo">Gestión de reportes</h1>
+                <p class="rep-subtitulo">Descarga aquí los reportes del sistema de inventario</p>
+            </div>
+            <div class="rep-usuario" id="repUsuario"></div>
+        </header>
+
+        <main class="rep-contenedor">
+            <div id="repMensaje" class="rep-mensaje rep-oculto" role="status" aria-live="polite"></div>
+            <section class="rep-rejilla" id="repLista"></section>
+        </main>
+    </div>
+
+    <script src="../api.js"></script>
+    <script src="gestionReportes.js"></script>
+</body>
+</html>

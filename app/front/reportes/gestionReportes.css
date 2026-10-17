@@ -1,0 +1,194 @@
+/* app/front/reportes/gestionReportes.css */
+body {
+    margin: 0;
+}
+
+.rep-pagina {
+    --rep-azul: #1f3a5f;
+    --rep-azul-oscuro: #172c48;
+    --rep-azul-claro: #eef2f7;
+    --rep-texto: #1d2939;
+    --rep-texto-suave: #667085;
+    --rep-borde: #e4e7ec;
+    --rep-fondo: #f5f7fa;
+
+    min-height: 100vh;
+    background: var(--rep-fondo);
+    color: var(--rep-texto);
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    font-size: 15px;
+}
+
+/* ---------- Encabezado ---------- */
+.rep-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+    padding: 24px 32px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--rep-borde);
+    color: var(--rep-texto);
+}
+
+.rep-titulo {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.rep-subtitulo {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--rep-texto-suave);
+}
+
+.rep-usuario {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--rep-texto-suave);
+}
+
+/* ---------- Contenido ---------- */
+.rep-contenedor {
+    width: 100%;
+    padding: 32px;
+}
+
+.rep-rejilla {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 24px;
+}
+
+/* ---------- Tarjetas ---------- */
+.rep-tarjeta {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 28px 32px;
+    background: #ffffff;
+    border: 1px solid var(--rep-borde);
+    border-radius: 12px;
+}
+
+.rep-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: var(--rep-azul-claro);
+    color: var(--rep-azul);
+}
+
+.rep-icono svg {
+    width: 28px;
+    height: 28px;
+}
+
+.rep-tarjeta-titulo {
+    margin: 4px 0 0;
+    font-size: 17px;
+    font-weight: 700;
+}
+
+.rep-tarjeta-descripcion {
+    margin: 0;
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--rep-texto-suave);
+}
+
+.rep-formato {
+    align-self: flex-start;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--rep-azul-claro);
+    color: var(--rep-azul-oscuro);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
+/* ---------- Botón ---------- */
+.rep-boton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    height: 40px;
+    padding: 0 20px;
+    border: 1px solid var(--rep-azul);
+    border-radius: 8px;
+    background: var(--rep-azul);
+    color: #ffffff;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.rep-boton svg {
+    width: 18px;
+    height: 18px;
+}
+
+.rep-boton:hover:not(:disabled) {
+    background: var(--rep-azul-oscuro);
+}
+
+.rep-boton:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(31, 58, 95, 0.15);
+}
+
+.rep-boton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ---------- Mensajes ---------- */
+.rep-mensaje {
+    margin-bottom: 20px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+}
+
+.rep-mensaje.rep-exito {
+    background: #ecfdf3;
+    color: #067647;
+}
+
+.rep-mensaje.rep-error {
+    background: #fef3f2;
+    color: #b42318;
+}
+
+.rep-oculto {
+    display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .rep-tarjeta,
+    .rep-boton {
+        transition: none;
+    }
+    .rep-tarjeta:hover {
+        transform: none;
+    }
+}
+
+@media (max-width: 600px) {
+    .rep-encabezado {
+        padding: 20px 16px;
+    }
+    .rep-contenedor {
+        padding: 16px;
+    }
+}

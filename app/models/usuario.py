@@ -1,3 +1,4 @@
+#app\models\usuario.py
 from datetime import datetime
 
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String, Table, func

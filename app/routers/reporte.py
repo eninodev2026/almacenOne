@@ -9,6 +9,12 @@ from openpyxl import Workbook
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter
 
+
+from collections import defaultdict
+from openpyxl.styles import Border, Side
+from openpyxl.worksheet.properties import PageSetupProperties
+from app.deps import require_permission
+
 from fastapi import APIRouter, Depends
 from sqlalchemy import and_, func, select, true
 from sqlalchemy.orm import Session
@@ -227,6 +233,141 @@ def stock_excel(db: Session = Depends(get_db)):
     buffer.seek(0)
 
     nombre_archivo = f"stock_{date.today():%Y-%m-%d}.xlsx"
+    return StreamingResponse(
+        buffer,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f'attachment; filename="{nombre_archivo}"'},
+    )
+    
+    
+    # =====================================================================
+# NUEVO: Reporte de stock por bodega (una hoja por bodega)
+# Ruta: GET /reportes/stock-bodegas/excel
+# =====================================================================
+def _nombre_hoja_excel(nombre: str, usados: set) -> str:
+    # Excel no acepta [ ] : * ? / \ y limita el nombre a 31 caracteres
+    limpio = "".join(c for c in nombre if c not in '[]:*?/\\')[:31] or "Bodega"
+    base, n = limpio, 2
+    while limpio in usados:
+        sufijo = f" ({n})"
+        limpio = base[: 31 - len(sufijo)] + sufijo
+        n += 1
+    usados.add(limpio)
+    return limpio
+
+
+@router.get("/stock-bodegas/excel")
+def stock_por_bodega_excel(
+    db: Session = Depends(get_db),
+    usuario=Depends(require_permission("inventario.ver")),
+):
+    solo_con_stock = True  # False = también lista los productos con stock 0
+
+    bodegas = db.scalars(select(Bodega).order_by(Bodega.nombre)).all()
+
+    consulta = (
+        select(
+            Saldo.bodega_id.label("bodega_id"),
+            Producto.codigo,
+            Producto.nombre.label("producto"),
+            UnidadMedida.abreviatura.label("presentacion"),
+            Saldo.cantidad.label("stock"),
+        )
+        .select_from(Saldo)
+        .join(Producto, Producto.id == Saldo.producto_id)
+        .join(UnidadMedida, UnidadMedida.id == Producto.unidad_base_id)
+        .order_by(Producto.nombre)
+    )
+    if solo_con_stock:
+        consulta = consulta.where(Saldo.cantidad > 0)
+
+    filas_por_bodega = defaultdict(list)
+    for r in db.execute(consulta).all():
+        filas_por_bodega[r.bodega_id].append(r)
+
+    azul = "1F6FEB"
+    relleno_titulo = PatternFill("solid", fgColor=azul)
+    relleno_alterno = PatternFill("solid", fgColor="F3F7FF")
+    lado = Side(style="thin", color="BFBFBF")
+    borde = Border(left=lado, right=lado, top=lado, bottom=lado)
+
+    columnas = [
+        ("CÓDIGO DE PRODUCTO", 22, None, "left"),
+        ("NOMBRE", 52, None, "left"),
+        ("TIPO DE PRESENTACIÓN", 24, None, "center"),
+        ("CANTIDAD (STOCK DISPONIBLE)", 28, "#,##0.000", "right"),
+    ]
+    fila_titulos = 6
+
+    libro = Workbook()
+    nombres_usados: set = set()
+    fecha_reporte = date.today()
+
+    for i, bodega in enumerate(bodegas):
+        hoja = libro.active if i == 0 else libro.create_sheet()
+        hoja.title = _nombre_hoja_excel(bodega.nombre, nombres_usados)
+        hoja.sheet_view.showGridLines = False
+
+        # ---------- Encabezado de la hoja ----------
+        hoja.merge_cells("A1:D1")
+        hoja["A1"] = "REPORTE DE STOCK DISPONIBLE"
+        hoja["A1"].font = Font(bold=True, size=16, color=azul)
+        hoja["A1"].alignment = Alignment(horizontal="center", vertical="center")
+        hoja.row_dimensions[1].height = 28
+
+        encabezado = [
+            ("Bodega:", bodega.nombre, None),
+            ("Fecha del reporte:", fecha_reporte, "dd/mm/yyyy"),
+            ("Generado por:", usuario.nombre, None),
+        ]
+        for fila, (etiqueta, valor, formato) in enumerate(encabezado, start=2):
+            hoja.cell(row=fila, column=1, value=etiqueta).font = Font(bold=True)
+            celda = hoja.cell(row=fila, column=2, value=valor)
+            celda.alignment = Alignment(horizontal="left")
+            if formato:
+                celda.number_format = formato
+
+        # ---------- Títulos de columnas ----------
+        for col, (titulo, ancho, formato, alineacion) in enumerate(columnas, start=1):
+            celda = hoja.cell(row=fila_titulos, column=col, value=titulo)
+            celda.font = Font(bold=True, color="FFFFFF")
+            celda.fill = relleno_titulo
+            celda.border = borde
+            celda.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+            hoja.column_dimensions[get_column_letter(col)].width = ancho
+        hoja.row_dimensions[fila_titulos].height = 30
+
+        # ---------- Datos ----------
+        filas = filas_por_bodega.get(bodega.id, [])
+        for n, r in enumerate(filas):
+            num_fila = fila_titulos + 1 + n
+            valores = [r.codigo, r.producto, r.presentacion, r.stock]
+            for col, ((titulo, ancho, formato, alineacion), valor) in enumerate(zip(columnas, valores), start=1):
+                celda = hoja.cell(row=num_fila, column=col, value=valor)
+                celda.border = borde
+                celda.alignment = Alignment(horizontal=alineacion, vertical="center")
+                if formato:
+                    celda.number_format = formato
+                if n % 2 == 1:
+                    celda.fill = relleno_alterno
+
+        ultima_fila = fila_titulos + len(filas)
+        if not filas:
+            hoja.cell(row=fila_titulos + 1, column=1, value="Sin productos con stock en esta bodega").font = Font(italic=True)
+
+        # ---------- Filtros, congelado e impresión ----------
+        hoja.auto_filter.ref = f"A{fila_titulos}:D{max(ultima_fila, fila_titulos)}"
+        hoja.freeze_panes = f"A{fila_titulos + 1}"
+        hoja.print_title_rows = f"{fila_titulos}:{fila_titulos}"
+        hoja.sheet_properties.pageSetUpPr = PageSetupProperties(fitToPage=True)
+        hoja.page_setup.fitToWidth = 1
+        hoja.page_setup.fitToHeight = 0
+
+    buffer = BytesIO()
+    libro.save(buffer)
+    buffer.seek(0)
+
+    nombre_archivo = f"stock_por_bodega_{fecha_reporte:%Y-%m-%d}.xlsx"
     return StreamingResponse(
         buffer,
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

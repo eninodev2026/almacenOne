@@ -1,6 +1,7 @@
 #app\models\inventario.py   
 from datetime import datetime
 from decimal import Decimal
+import enum
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -11,6 +12,11 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
 
+class EstadoTraslado(str, enum.Enum):
+    DESPACHADO = "DESPACHADO"
+    RECIBIDO = "RECIBIDO"
+    RECHAZADO = "RECHAZADO"
+    ANULADO = "ANULADO"
 
 class Movimiento(Base):
     __tablename__ = "movimiento"
@@ -29,6 +35,11 @@ class Movimiento(Base):
     motivo_anulacion: Mapped[str | None] = mapped_column(Text)
     fecha_anulacion: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     detalles: Mapped[list["MovimientoDetalle"]] = relationship()
+    
+    observacion_despacho: Mapped[str | None] = mapped_column(Text)
+    observacion_recepcion: Mapped[str | None] = mapped_column(Text)
+    fecha_recepcion: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    usuario_nombre: Mapped[str | None] = mapped_column(String(120))
 
 
 class MovimientoDetalle(Base):

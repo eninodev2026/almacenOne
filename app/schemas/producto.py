@@ -1,3 +1,4 @@
+#app\schemas\producto.py
 from pydantic import BaseModel, ConfigDict
 
 

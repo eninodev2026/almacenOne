@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Traslado entre bodegas</title>
+  <link rel="stylesheet" href="traslados.css">
+</head>
+<body>
+  <div class="contenedor">
+    <div class="tarjeta">
+      <h1>Traslado entre bodegas</h1>
+      <p class="ayuda">Mueve mercadería de una bodega a otra. El costo promedio viaja con el producto.</p>
+
+      <div class="grilla">
+        <div class="campo">
+          <label for="bodegaOrigen">Bodega de origen</label>
+          <select id="bodegaOrigen"></select>
+        </div>
+        <div class="campo">
+          <label for="bodegaDestino">Bodega de destino</label>
+          <select id="bodegaDestino"></select>
+        </div>
+      </div>
+
+      <div class="tabla-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Producto</th>
+              <th>Presentación</th>
+              <th>Cantidad</th>
+              <th>Equivale a</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="lineas"></tbody>
+        </table>
+      </div>
+
+      <div class="campo campo-observacion">
+        <label for="observacion">Observaciones del despacho (opcional)</label>
+        <textarea id="observacion" rows="2"></textarea>
+      </div>
+
+      <div class="acciones">
+        <button type="button" id="btnAgregar" class="btn-secundario">+ Agregar producto</button>
+        <button type="button" id="btnGuardar" class="btn-primario">Registrar traslado</button>
+        <button type="button" id="btnLimpiar" class="btn-secundario">Limpiar</button>
+      </div>
+
+      <div id="mensaje"></div>
+    </div>
+  </div>
+
+  <script src="../api.js"></script>
+  <script src="traslados.js"></script>
+</body>
+</html>

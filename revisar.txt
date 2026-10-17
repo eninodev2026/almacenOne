@@ -1,0 +1,711 @@
+﻿
+===== app\main.py =====
+
+# app/main.py
+from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import APIKeyHeader
+
+from app.config import settings
+from app.deps import get_current_user
+from app.routers import auth
+from app.routers import usuario
+from app.routers import categoria
+from app.routers import unidad_medida
+from app.routers import producto
+from app.routers import presentacion
+from app.routers import proveedor
+from app.routers import bodega
+from app.routers import tipo_movimiento
+from app.routers import compra
+from app.routers import stock
+from app.routers import salida
+from app.routers import inventario
+from app.routers import reporte
+from app.routers import traslado
+app = FastAPI(title="Inventario")
+
+# 1. MIDDLEWARE DE CORS (orÃ­genes explÃ­citos: obligatorio para usar cookies)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.lista_cors,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Encabezado que exige get_current_user en las peticiones de escritura.
+# Solo sirve para que Swagger muestre el botÃ³n Authorize y lo envÃ­e; la validaciÃ³n sigue en deps.py
+encabezado_swagger = APIKeyHeader(name="x-requested-with", auto_error=False)
+
+# 2. REGISTRAR ROUTERS
+# /auth queda abierto (login). Todo lo demÃ¡s exige sesiÃ³n vÃ¡lida.
+app.include_router(auth.router)
+
+protegido = [Depends(get_current_user), Depends(encabezado_swagger)]
+app.include_router(usuario.router, dependencies=protegido)
+app.include_router(categoria.router, dependencies=protegido)
+app.include_router(unidad_medida.router, dependencies=protegido)
+app.include_router(producto.router, dependencies=protegido)
+app.include_router(presentacion.router, dependencies=protegido)
+app.include_router(proveedor.router, dependencies=protegido)
+app.include_router(bodega.router, dependencies=protegido)
+app.include_router(tipo_movimiento.router, dependencies=protegido)
+app.include_router(compra.router, dependencies=protegido)
+app.include_router(stock.router, dependencies=protegido)
+app.include_router(salida.router, dependencies=protegido)
+app.include_router(inventario.router, dependencies=protegido)
+app.include_router(reporte.router, dependencies=protegido)
+app.include_router(traslado.router, dependencies=protegido)
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
+===== app\config.py =====
+
+# app\config.py
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+class Settings(BaseSettings):
+    database_url: str
+    jwt_secret: str
+    cors_origins: str = "http://localhost:5500"
+    cookie_secure: bool = False
+    access_minutes: int = 480
+    model_config = SettingsConfigDict(env_file=".env")
+
+    @property
+    def lista_cors(self) -> list[str]:
+        return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+
+settings = Settings()
+
+===== app\database.py =====
+
+#app\database.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import DeclarativeBase, sessionmaker
+
+from app.config import settings
+
+engine = create_engine(settings.database_url)
+SessionLocal = sessionmaker(bind=engine, autoflush=False)
+
+
+class Base(DeclarativeBase):
+    pass
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+===== app\front\api.js =====
+
+// app/front/api.js
+// DirecciÃ³n donde estÃ¡ funcionando nuestra API
+const url_api = "http://localhost:8000";
+
+// Carpeta base del front (para redirigir al login desde cualquier pantalla)
+const BASE_FRONT = document.currentScript ? new URL(".", document.currentScript.src).href : "";
+
+// Todas las peticiones pasan por aquÃ­: envÃ­a la cookie de sesiÃ³n, el header
+// anti-CSRF y manda al login si la sesiÃ³n expirÃ³.
+async function fetchApi(ruta, opciones) {
+    const config = Object.assign({}, opciones);
+    config.credentials = "include";
+    config.headers = Object.assign({ "X-Requested-With": "fetch" }, config.headers);
+
+    const respuesta = await fetch(url_api + ruta, config);
+
+    if (respuesta.status === 401 && ruta !== "/auth/login") {
+        window.location.href = BASE_FRONT + "login/login.html";
+        throw new Error("Tu sesiÃ³n expirÃ³. Inicia sesiÃ³n de nuevo.");
+    }
+    return respuesta;
+}
+
+// ================== SESIÃ“N ==================
+
+async function iniciarSesion(username, password) {
+    return await enviarDatosALaApi("/auth/login", { username: username, password: password });
+}
+
+async function cerrarSesion() {
+    await fetchApi("/auth/logout", { method: "POST" });
+    window.location.href = BASE_FRONT + "login/login.html";
+}
+
+// Devuelve { id, username, nombre, rol, permisos: [...] }
+async function obtenerSesion() {
+    return await pedirListaALaApi("/auth/me");
+}
+
+// Lista las sesiones abiertas (requiere permiso de gestiÃ³n de usuarios)
+async function cargarSesionesActivas() {
+    return await pedirListaALaApi("/usuarios/sesiones");
+}
+
+// Cierra una sesiÃ³n ajena (requiere permiso de gestiÃ³n de usuarios)
+async function cerrarSesionRemota(sesionId) {
+    return await enviarDatosALaApi("/usuarios/sesiones/" + sesionId + "/cerrar", {});
+}
+
+// Trae las categorÃ­as desde la API
+async function cargarCategorias() {
+    const respuestaDeCategorias = await fetchApi("/categorias/");
+    const categorias = await respuestaDeCategorias.json();
+    return categorias;
+}
+
+// Trae las unidades desde la API
+async function cargarUnidades() {
+    const respuestaDeUnidades = await fetchApi("/unidades/");
+    const unidades = await respuestaDeUnidades.json();
+    return unidades;
+}
+
+// EnvÃ­a los datos para crear un producto
+async function crearProducto(datosIngresoProducto) {
+    const respuestaDelEndpoint = await fetchApi(
+        "/productos/",
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(datosIngresoProducto)
+        }
+    );
+    const datosQueRespondioLaApi = await respuestaDelEndpoint.json();
+    return datosQueRespondioLaApi;
+}
+
+// ================== AYUDANTES ==================
+
+function leerMensajeDeError(datosDeError) {
+    if (!datosDeError || !datosDeError.detail) {
+        return "OcurriÃ³ un error inesperado";
+    }
+    if (typeof datosDeError.detail === "string") {
+        return datosDeError.detail;
+    }
+    if (Array.isArray(datosDeError.detail)) {
+        return datosDeError.detail.map(function (error) {
+            return error.msg;
+        }).join(". ");
+    }
+    return "OcurriÃ³ un error inesperado";
+}
+
+// Pide una lista a la API. El parÃ¡metro "signal" es opcional: sirve para
+// poder cancelar la peticiÃ³n si el usuario sigue escribiendo.
+async function pedirListaALaApi(ruta, signal) {
+    const respuesta = await fetchApi(ruta, { signal: signal });
+    if (!respuesta.ok) {
+        throw new Error("No se pudo cargar " + ruta);
+    }
+    return await respuesta.json();
+}
+async function enviarDatosALaApi(ruta, datos) {
+    const respuesta = await fetchApi(
+        ruta,
+        {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(datos)
+        }
+    );
+
+    const datosQueRespondioLaApi = await respuesta.json().catch(function () {
+        return null;
+    });
+
+    if (!respuesta.ok) {
+        throw new Error(leerMensajeDeError(datosQueRespondioLaApi));
+    }
+
+    return datosQueRespondioLaApi;
+}
+
+// ================== BODEGAS, PRODUCTOS, PRESENTACIONES Y SALIDAS ==================
+
+// EnvÃ­a los datos para crear una bodega
+async function crearBodega(datosIngresoBodega) {
+    return await enviarDatosALaApi("/bodegas/", datosIngresoBodega);
+}
+
+async function cargarBodegas() {
+    return await pedirListaALaApi("/bodegas/");
+}
+
+// Sin parÃ¡metros: trae TODOS los productos (las otras pantallas la usan asÃ­).
+// Con { texto, limite, signal }: pide al servidor solo los productos que
+// coinciden con el texto (por nombre o cÃ³digo), mÃ¡ximo "limite" resultados.
+async function cargarProductos(opciones) {
+    if (!opciones) {
+        return await pedirListaALaApi("/productos/");
+    }
+
+    const limite = opciones.limite || 10;
+    const ruta =
+        "/productos/buscar?q=" + encodeURIComponent(opciones.texto || "") +
+        "&limite=" + limite;
+
+    return await pedirListaALaApi(ruta, opciones.signal);
+}
+
+async function cargarPresentaciones(productoId) {
+    let ruta = "/presentaciones/";
+    if (productoId) {
+        ruta = ruta + "?producto_id=" + productoId;
+    }
+    return await pedirListaALaApi(ruta);
+}
+
+async function crearPresentacion(datosIngresoPresentacion) {
+    return await enviarDatosALaApi("/presentaciones/", datosIngresoPresentacion);
+}
+
+async function crearSalida(datosIngresoSalida) {
+    return await enviarDatosALaApi("/salidas/", datosIngresoSalida);
+}
+
+// ================== PROVEEDORES Y COMPRAS ==================
+
+async function cargarProveedores() {
+    return await pedirListaALaApi("/proveedores/");
+}
+
+async function crearCompra(datosIngresoCompra) {
+    return await enviarDatosALaApi("/compras/", datosIngresoCompra);
+}
+
+// ================== INVENTARIO (NUEVO) ==================
+
+async function buscarInventario(filtros) {
+    const params = new URLSearchParams();
+    
+    if (filtros.texto) params.append('texto', filtros.texto);
+    if (filtros.bodegaId) params.append('bodega_id', filtros.bodegaId);
+    if (filtros.stockMin !== null && filtros.stockMin !== undefined) params.append('stock_min', filtros.stockMin);
+    if (filtros.stockMax !== null && filtros.stockMax !== undefined) params.append('stock_max', filtros.stockMax);
+    if (filtros.fechaDesde) params.append('fecha_desde', filtros.fechaDesde);
+    if (filtros.fechaHasta) params.append('fecha_hasta', filtros.fechaHasta);
+    if (filtros.diasMax !== null && filtros.diasMax !== undefined) params.append('dias_max', filtros.diasMax);
+
+    // Construimos la ruta. La barra diagonal final (/) es CRÃTICA para evitar 
+    // la redirecciÃ³n 307 de FastAPI que rompe el CORS.
+    const queryString = params.toString() ? `?${params.toString()}` : '';
+    const ruta = `/inventario/${queryString}`;
+
+    const respuesta = await fetchApi(ruta);
+
+    if (!respuesta.ok) {
+        const datosError = await respuesta.json().catch(() => ({}));
+        throw new Error(leerMensajeDeError(datosError) || "No se pudo cargar el inventario");
+    }
+
+    return await respuesta.json();
+}
+
+// ================== PROVEEDORES Y COMPRAS ==================
+async function crearProveedor(datosIngresoProveedor) {
+    return await enviarDatosALaApi("/proveedores/", datosIngresoProveedor);
+}
+
+
+// Descarga la hoja de salida (PDF) de un movimiento
+async function descargarHojaSalida(movimientoId) {
+    const respuesta = await fetchApi("/salidas/" + movimientoId + "/pdf");
+
+    if (!respuesta.ok) {
+        const datosError = await respuesta.json().catch(function () {
+            return null;
+        });
+        throw new Error(leerMensajeDeError(datosError));
+    }
+
+    const archivo = await respuesta.blob();
+    const direccionTemporal = URL.createObjectURL(archivo);
+
+    const enlace = document.createElement("a");
+    enlace.href = direccionTemporal;
+    enlace.download = "salida_" + movimientoId + ".pdf";
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+
+    setTimeout(function () {
+        URL.revokeObjectURL(direccionTemporal);
+    }, 1000);
+}
+
+
+// ================== ANULACIÃ“N DE SALIDAS ==================
+
+// Trae la lista de salidas (activas y anuladas)
+async function cargarSalidas() {
+    return await pedirListaALaApi("/salidas/");
+}
+
+// Anula una salida y le devuelve el stock a la bodega
+async function anularSalida(movimientoId, motivo) {
+    const respuesta = await fetchApi(
+        "/salidas/" + movimientoId + "/anular",
+        {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ motivo: motivo })
+        }
+    );
+
+    const datosQueRespondioLaApi = await respuesta.json().catch(function () {
+        return null;
+    });
+
+    if (!respuesta.ok) {
+        throw new Error(leerMensajeDeError(datosQueRespondioLaApi));
+    }
+
+    return datosQueRespondioLaApi;
+}
+
+
+// Descarga el reporte de stock en Excel (endpoint /reportes/stock/excel)
+async function descargarReporteStock() {
+    const respuesta = await fetchApi("/reportes/stock/excel");
+
+    if (!respuesta.ok) {
+        const datosError = await respuesta.json().catch(function () {
+            return null;
+        });
+        throw new Error(leerMensajeDeError(datosError));
+    }
+
+    const archivo = await respuesta.blob();
+    const direccionTemporal = URL.createObjectURL(archivo);
+
+    const enlace = document.createElement("a");
+    enlace.href = direccionTemporal;
+    enlace.download = "stock_" + new Date().toISOString().slice(0, 10) + ".xlsx";
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+
+    setTimeout(function () {
+        URL.revokeObjectURL(direccionTemporal);
+    }, 1000);
+}
+
+// EnvÃ­a los datos para crear una categorÃ­a
+async function crearCategoria(datosIngresoCategoria) {
+    return await enviarDatosALaApi("/categorias/", datosIngresoCategoria);
+}
+
+// Crea un traslado entre bodegas.
+// Recibe: { bodega_origen_id, bodega_destino_id, detalles: [{ presentacion_id, cantidad }] }
+async function crearTraslado(datosIngresoTraslado) {
+    return await enviarDatosALaApi("/traslados/", datosIngresoTraslado);
+}
+
+// Lista los traslados entre bodegas (reporte).
+// estado es opcional: "DESPACHADO", "RECIBIDO" o "RECHAZADO".
+async function cargarTraslados(estado) {
+    let ruta = "/traslados/";
+    if (estado) {
+        ruta = ruta + "?estado=" + encodeURIComponent(estado);
+    }
+    return await pedirListaALaApi(ruta);
+}
+
+// Resuelve un traslado DESPACHADO. accion: "recibir" o "rechazar".
+async function resolverTraslado(movimientoId, accion, observacion) {
+    const respuesta = await fetchApi(
+        "/traslados/" + movimientoId + "/" + accion,
+        {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ observacion: observacion || null })
+        }
+    );
+
+    const datosQueRespondioLaApi = await respuesta.json().catch(function () {
+        return null;
+    });
+
+    if (!respuesta.ok) {
+        throw new Error(leerMensajeDeError(datosQueRespondioLaApi));
+    }
+
+    return datosQueRespondioLaApi;
+}
+
+async function recibirTraslado(movimientoId, observacion) {
+    return await resolverTraslado(movimientoId, "recibir", observacion);
+}
+
+async function rechazarTraslado(movimientoId, observacion) {
+    return await resolverTraslado(movimientoId, "rechazar", observacion);
+}
+
+
+// ================== REPORTES (DESCARGA CENTRALIZADA) ==================
+
+// Descarga cualquier archivo que entregue la API (Excel, PDF...) y lo guarda con el nombre indicado.
+async function descargarArchivoDeLaApi(ruta, nombreArchivo) {
+    const respuesta = await fetchApi(ruta);
+
+    if (!respuesta.ok) {
+        const datosError = await respuesta.json().catch(function () {
+            return null;
+        });
+        throw new Error(leerMensajeDeError(datosError));
+    }
+
+    const archivo = await respuesta.blob();
+    const direccionTemporal = URL.createObjectURL(archivo);
+
+    const enlace = document.createElement("a");
+    enlace.href = direccionTemporal;
+    enlace.download = nombreArchivo;
+    document.body.appendChild(enlace);
+    enlace.click();
+    enlace.remove();
+
+    setTimeout(function () {
+        URL.revokeObjectURL(direccionTemporal);
+    }, 1000);
+}
+
+// Descarga el Excel de stock con una hoja por bodega (endpoint /reportes/stock-bodegas/excel)
+async function descargarReporteStockPorBodega() {
+    const hoy = new Date();
+    const fecha =
+        hoy.getFullYear() + "-" +
+        String(hoy.getMonth() + 1).padStart(2, "0") + "-" +
+        String(hoy.getDate()).padStart(2, "0");
+
+    await descargarArchivoDeLaApi("/reportes/stock-bodegas/excel", "stock_por_bodega_" + fecha + ".xlsx");
+}
+
+
+// Descarga el comprobante PDF de un traslado
+async function descargarComprobanteTraslado(movimientoId) {
+    await descargarArchivoDeLaApi("/traslados/" + movimientoId + "/pdf", "traslado_" + movimientoId + ".pdf");
+}
+
+===== requirements.txt =====
+
+alembic==1.20.0
+annotated-doc==0.0.5
+annotated-types==0.8.0
+anyio==4.15.1
+click==8.5.0
+fastapi==0.141.1
+greenlet==3.5.6
+h11==0.16.0
+httptools==0.8.0
+idna==3.20
+Mako==1.4.1
+MarkupSafe==3.0.3
+psycopg==3.3.6
+psycopg-binary==3.3.6
+pydantic==2.13.5
+pydantic-settings==2.15.0
+pydantic_core==2.46.5
+python-dotenv==1.2.3
+PyYAML==6.0.3
+SQLAlchemy==2.0.54
+starlette==1.6.0
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+tzdata==2026.4
+uvicorn==0.53.0
+watchfiles==1.3.0
+websockets==17.1
+
+
+===== app\requirements.txt =====
+
+alembic==1.20.0
+annotated-doc==0.0.5
+annotated-types==0.8.0
+anyio==4.15.1
+charset-normalizer==3.5.2
+click==8.5.0
+fastapi==0.141.1
+greenlet==3.5.6
+h11==0.16.0
+httptools==0.8.0
+idna==3.20
+Mako==1.4.1
+MarkupSafe==3.0.3
+pillow==12.3.0
+psycopg==3.3.6
+psycopg-binary==3.3.6
+pydantic==2.13.5
+pydantic-settings==2.15.0
+pydantic_core==2.46.5
+python-dotenv==1.2.3
+PyYAML==6.0.3
+reportlab==5.0.1
+SQLAlchemy==2.0.54
+starlette==1.6.0
+typing-inspection==0.4.4
+typing_extensions==4.16.0
+tzdata==2026.4
+uvicorn==0.53.0
+watchfiles==1.3.0
+websockets==17.1
+
+
+===== alembic\env.py =====
+
+#alembic\env.py
+from logging.config import fileConfig
+
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
+
+from alembic import context
+
+# this is the Alembic Config object, which provides
+# access to the values within the .ini file in use.
+config = context.config
+
+# Interpret the config file for Python logging.
+# This line sets up loggers basically.
+if config.config_file_name is not None:
+    fileConfig(config.config_file_name)
+
+# add your model's MetaData object here
+# for 'autogenerate' support
+# from myapp import mymodel
+# target_metadata = mymodel.Base.metadata
+from app.config import settings
+from app.database import Base
+import app.models  # noqa: F401  (registra los modelos)
+
+config.set_main_option("sqlalchemy.url", settings.database_url.replace("%", "%%"))
+target_metadata = Base.metadata
+
+# other values from the config, defined by the needs of env.py,
+# can be acquired:
+# my_important_option = config.get_main_option("my_important_option")
+# ... etc.
+
+
+def run_migrations_offline() -> None:
+    """Run migrations in 'offline' mode.
+
+    This configures the context with just a URL
+    and not an Engine, though an Engine is acceptable
+    here as well.  By skipping the Engine creation
+    we don't even need a DBAPI to be available.
+
+    Calls to context.execute() here emit the given string to the
+    script output.
+
+    """
+    url = config.get_main_option("sqlalchemy.url")
+    context.configure(
+        url=url,
+        target_metadata=target_metadata,
+        literal_binds=True,
+        dialect_opts={"paramstyle": "named"},
+    )
+
+    with context.begin_transaction():
+        context.run_migrations()
+
+
+def run_migrations_online() -> None:
+    """Run migrations in 'online' mode.
+
+    In this scenario we need to create an Engine
+    and associate a connection with the context.
+
+    """
+    connectable = engine_from_config(
+        config.get_section(config.config_ini_section, {}),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
+    )
+
+    with connectable.connect() as connection:
+        context.configure(
+            connection=connection, target_metadata=target_metadata
+        )
+
+        with context.begin_transaction():
+            context.run_migrations()
+
+
+if context.is_offline_mode():
+    run_migrations_offline()
+else:
+    run_migrations_online()
+
+
+===== app\security.py =====
+
+from datetime import datetime, timedelta, timezone
+
+import jwt
+from argon2 import PasswordHasher
+from argon2.exceptions import InvalidHashError, VerifyMismatchError
+
+from app.config import settings
+
+ALGORITHM = "HS256"
+COOKIE_ACCESS = "access_token"
+
+_ph = PasswordHasher()
+
+if len(settings.jwt_secret) < 32:
+    raise RuntimeError("JWT_SECRET debe tener al menos 32 caracteres")
+
+
+def hash_password(password: str) -> str:
+    return _ph.hash(password)
+
+
+def verify_password(password: str, password_hash: str) -> bool:
+    try:
+        return _ph.verify(password_hash, password)
+    except (VerifyMismatchError, InvalidHashError):
+        return False
+
+
+def crear_access_token(user_id: int, sesion_id: int) -> str:
+    ahora = datetime.now(timezone.utc)
+    payload = {
+        "sub": str(user_id),
+        "sid": sesion_id,
+        "iat": ahora,
+        "exp": ahora + timedelta(minutes=settings.access_minutes),
+    }
+    return jwt.encode(payload, settings.jwt_secret, algorithm=ALGORITHM)
+
+
+def decodificar_token(token: str) -> dict | None:
+    try:
+        return jwt.decode(token, settings.jwt_secret, algorithms=[ALGORITHM])
+    except jwt.PyJWTError:
+        return None
+
+===== .env (valores ocultos) =====
+
+DATABASE_URL=xxx
+JWT_SECRET=xxx
+CORS_ORIGINS=xxx
+COOKIE_SECURE=xxx
+
+===== alembic.ini (sqlalchemy.url) =====
+
+sqlalchemy.url = driver://user:xxx@localhost/dbname

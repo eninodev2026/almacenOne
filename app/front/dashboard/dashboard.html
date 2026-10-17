@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Dashboard - Sistema de Inventario</title>
+  <title>Administración de Bodegas - Inventario - Stock - Kardex - Salidas y traslados</title>
   <link rel="stylesheet" href="dashboard.css">
   <style>
     #tablaConectados { width: 100%; border-collapse: collapse; font-size: .875rem; }
@@ -18,7 +18,7 @@
     
     <header class="header" style="display:flex; justify-content:space-between; align-items:flex-start; gap:16px;">
       <div>
-        <h1>Sistema de Inventario</h1>
+        <h1>Administración de Bodegas - Inventario - Stock - Kardex - Salidas y traslados</h1>
         <p class="subtitulo">Panel de control principal</p>
       </div>
       <div style="display:flex; align-items:center; gap:16px;">
@@ -71,65 +71,126 @@
       </div>
     </section>
 
-    <section class="modulo-accesos">
+        <section class="modulo-accesos">
       <h2>Módulos del Sistema</h2>
-      
-      <div class="grid-modulos">
-        <a href="../ingresoMercaderia/ingresoMercaderia.html" class="modulo-card">
-          <div class="modulo-icono">📥</div>
-          <h3>Ingreso de Mercadería</h3>
-          <p>Registrar compras e importar DTE (JSON)</p>
-        </a>
 
-        <a href="../inventario/inventario.html" class="modulo-card">
-          <div class="modulo-icono">📊</div>
-          <h3>Consulta de Inventario</h3>
-          <p>Buscar productos, stock y días en bodega</p>
-        </a>
+      <div class="menu-grupos">
 
-        <a href="../gestionProductos/frmCreacionProductos.html" class="modulo-card">
-          <div class="modulo-icono">📦</div>
-          <h3>Gestión de Productos</h3>
-          <p>Crear y administrar productos</p>
-        </a>
+        <details class="grupo">
+          <summary>
+            <span class="grupo-icono">📦</span>
+            <span class="grupo-titulo">Productos</span>
+            <span class="grupo-cantidad">3</span>
+          </summary>
+          <div class="grid-modulos">
+            <a href="../categorias/categorias.html" class="modulo-card">
+              <div class="modulo-icono">🏷️</div>
+              <h3>Crear categorías</h3>
+              <p>Clasificar productos</p>
+            </a>
+            <a href="../gestionProductos/frmCreacionProductos.html" class="modulo-card">
+              <div class="modulo-icono">📦</div>
+              <h3>Creación de productos</h3>
+              <p>Crear y administrar productos</p>
+            </a>
+            <a href="../crearPresentaciones/crearPresentaciones.html" class="modulo-card">
+              <div class="modulo-icono">📏</div>
+              <h3>Crear presentaciones</h3>
+              <p>Unidades y factores de conversión</p>
+            </a>
+          </div>
+        </details>
 
-        <a href="../crearPresentaciones/crearPresentaciones.html" class="modulo-card">
-          <div class="modulo-icono">📏</div>
-          <h3>Presentaciones</h3>
-          <p>Unidades y factores de conversión</p>
-        </a>
+        <details class="grupo">
+          <summary>
+            <span class="grupo-icono">🔄</span>
+            <span class="grupo-titulo">Movimientos</span>
+            <span class="grupo-cantidad">4</span>
+          </summary>
+          <div class="grid-modulos">
+            <a href="../ingresoMercaderia/ingresoMercaderia.html" class="modulo-card">
+              <div class="modulo-icono">📥</div>
+              <h3>Ingreso de mercadería vía JSON</h3>
+              <p>Registrar compras e importar DTE (JSON)</p>
+            </a>
+            <a href="../salidademercaderia/salidaMercaderia.html" class="modulo-card">
+              <div class="modulo-icono">📤</div>
+              <h3>Salidas de mercadería a facturación</h3>
+              <p>Registrar egresos de inventario</p>
+            </a>
+            <a href="../traslados/traslados.html" class="modulo-card">
+              <div class="modulo-icono">🔄</div>
+              <h3>Traslados entre bodegas</h3>
+              <p>Mover mercadería entre bodegas</p>
+            </a>
+            <a href="../anularSalidas/anularSalidas.html" class="modulo-card">
+              <div class="modulo-icono">🚫</div>
+              <h3>Anulación de salidas</h3>
+              <p>Anular salidas y devolver el stock a la bodega</p>
+            </a>
+          </div>
+        </details>
 
-        <a href="../salidademercaderia/salidaMercaderia.html" class="modulo-card">
-          <div class="modulo-icono">📤</div>
-          <h3>Salida de Mercadería</h3>
-          <p>Registrar egresos de inventario</p>
-        </a>
+        <details class="grupo">
+          <summary>
+            <span class="grupo-icono">🏢</span>
+            <span class="grupo-titulo">Proveedores</span>
+            <span class="grupo-cantidad">1</span>
+          </summary>
+          <div class="grid-modulos">
+            <a href="../proveedores/proveedores.html" class="modulo-card">
+              <div class="modulo-icono">🏢</div>
+              <h3>Gestión de proveedores</h3>
+              <p>Administrar proveedores</p>
+            </a>
+          </div>
+        </details>
 
-        <a href="../anularSalidas/anularSalidas.html" class="modulo-card">
-          <div class="modulo-icono">🚫</div>
-          <h3>Anular Salidas</h3>
-          <p>Anular salidas y devolver el stock a la bodega</p>
-        </a>
+        <details class="grupo">
+          <summary>
+            <span class="grupo-icono">🏭</span>
+            <span class="grupo-titulo">Bodegas</span>
+            <span class="grupo-cantidad">1</span>
+          </summary>
+          <div class="grid-modulos">
+            <a href="../bodegas/bodegas.html" class="modulo-card">
+              <div class="modulo-icono">🏭</div>
+              <h3>Gestión de bodegas</h3>
+              <p>Gestionar ubicaciones</p>
+            </a>
+          </div>
+        </details>
 
-        <!-- Nota: Si las carpetas de proveedores, bodegas, etc., tienen nombres diferentes, 
-             solo ajusta el 'href' aquí abajo con el nombre real de tu carpeta -->
-        <a href="../proveedores/proveedores.html" class="modulo-card">
-          <div class="modulo-icono">🏢</div>
-          <h3>Proveedores</h3>
-          <p>Administrar proveedores</p>
-        </a>
+        <details class="grupo">
+          <summary>
+            <span class="grupo-icono">📊</span>
+            <span class="grupo-titulo">Consultas</span>
+            <span class="grupo-cantidad">1</span>
+          </summary>
+          <div class="grid-modulos">
+            <a href="../inventario/inventario.html" class="modulo-card">
+              <div class="modulo-icono">📊</div>
+              <h3>Consultar productos físicos en inventario</h3>
+              <p>Buscar productos, stock y días en bodega</p>
+            </a>
+          </div>
+        </details>
 
-        <a href="../bodegas/bodegas.html" class="modulo-card">
-          <div class="modulo-icono">🏭</div>
-          <h3>Bodegas</h3>
-          <p>Gestionar ubicaciones</p>
-        </a>
+        <details class="grupo">
+          <summary>
+            <span class="grupo-icono">📄</span>
+            <span class="grupo-titulo">Reportes</span>
+            <span class="grupo-cantidad">1</span>
+          </summary>
+          <div class="grid-modulos">
+            <a href="../reportes/gestionReportes.html" class="modulo-card">
+              <div class="modulo-icono">📄</div>
+              <h3>Reportes</h3>
+              <p>Descargar reportes del sistema</p>
+            </a>
+          </div>
+        </details>
 
-        <a href="../categorias/categorias.html" class="modulo-card">
-          <div class="modulo-icono">🏷️</div>
-          <h3>Categorías</h3>
-          <p>Clasificar productos</p>
-        </a>
       </div>
     </section>
 
