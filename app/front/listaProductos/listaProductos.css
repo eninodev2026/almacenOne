@@ -1,0 +1,36 @@
+.barra-filtro {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.barra-filtro input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 0.95rem;
+}
+
+#contador {
+    white-space: nowrap;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+.tabla-productos {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tabla-productos th,
+.tabla-productos td {
+    text-align: left;
+    padding: 10px 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+.tabla-productos th {
+    font-weight: 600;
+}

@@ -1,3 +1,4 @@
+//app\front\login\login.js
 const PAGINA_INICIO = "../dashboard/dashboard.html";
 
 const campoUsuario = document.getElementById("username");

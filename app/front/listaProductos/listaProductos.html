@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="../gestionProductos/crearProductos.css">
+    <link rel="stylesheet" href="listaProductos.css">
+    <title>Lista de productos</title>
+</head>
+<body>
+
+    <main class="contenido">
+
+        <div class="encabezado-pagina">
+            <h1>Lista de productos</h1>
+            <p>Productos registrados en el catálogo.</p>
+        </div>
+
+        <section class="tarjeta">
+
+            <div class="barra-filtro">
+                <input type="text" id="filtro" list="sugerencias"
+                       placeholder="Buscar por código, nombre, categoría o unidad..."
+                       autocomplete="off">
+                <datalist id="sugerencias"></datalist>
+                <span id="contador"></span>
+            </div>
+
+            <table class="tabla-productos">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Nombre</th>
+                        <th>Categoría</th>
+                        <th>Unidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla"></tbody>
+            </table>
+
+            <p id="mensaje"></p>
+        </section>
+
+    </main>
+
+    <script src="../api.js"></script>
+    <script src="listaProductos.js"></script>
+
+</body>
+</html>

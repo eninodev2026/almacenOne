@@ -12,6 +12,16 @@
         grafico:
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
             '<line x1="12" x2="12" y1="20" y2="10"/><line x1="18" x2="18" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="16"/></svg>',
+        dinero:
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>',
+        alerta:
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>',    
+        traslado:
+            '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
+            '<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>',            
+
         descargar:
             '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">' +
             '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/></svg>'
@@ -32,7 +42,32 @@
             formato: "Excel (.xlsx)",
             icono: ICONOS.grafico,
             descargar: function () { return descargarReporteStock(); }
+        }, 
+        
+        {
+            titulo: "Valor de inventario",
+            descripcion: "Excel con el valor del inventario por producto y bodega: cantidad, costo promedio y valor total, con filtros y el total general.",
+            formato: "Excel (.xlsx)",
+            icono: ICONOS.dinero,
+            descargar: function () { return descargarReporteValorInventario(); }
+        },
+        {
+            titulo: "Productos agotados",
+            descripcion: "Excel con los productos que ya no tienen existencias en ninguna bodega: código, nombre y cantidad total, con filtros y el total de productos agotados.",
+            formato: "Excel (.xlsx)",
+            icono: ICONOS.alerta,
+            descargar: function () { return descargarReporteProductosAgotados(); }
+        },
+        
+        {
+            titulo: "Movimientos entre bodegas",
+            descripcion: "Excel con los traslados entre bodegas: estado (despachado, recibido o rechazado), origen, destino, producto, cantidad, valor y observaciones, con filtros y el valor total.",
+            formato: "Excel (.xlsx)",
+            icono: ICONOS.traslado,
+            descargar: function () { return descargarReporteMovimientosEntreBodegas(); }
         }
+        
+
     ];
 
     const contenedorLista = document.getElementById("repLista");

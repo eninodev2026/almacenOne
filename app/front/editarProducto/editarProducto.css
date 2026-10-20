@@ -1,0 +1,14 @@
+.acciones {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.acciones a {
+    text-decoration: none;
+}
+
+#mensaje {
+    margin-top: 12px;
+    font-weight: 600;
+}

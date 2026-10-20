@@ -3,6 +3,11 @@ from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import APIKeyHeader
 
+
+from pathlib import Path
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
+
 from app.config import settings
 from app.deps import get_current_user
 from app.routers import auth
@@ -58,3 +63,10 @@ app.include_router(traslado.router, dependencies=protegido)
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/", include_in_schema=False)
+def inicio():
+    return RedirectResponse("/front/login/login.html")
+
+app.mount("/front", StaticFiles(directory=Path(__file__).parent / "front"), name="front")

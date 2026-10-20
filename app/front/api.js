@@ -1,6 +1,6 @@
 // app/front/api.js
 // Dirección donde está funcionando nuestra API
-const url_api = "http://localhost:8000";
+const url_api = (location.port === "8000" || location.protocol === "https:") ? "" : "http://localhost:8000";
 
 // Carpeta base del front (para redirigir al login desde cualquier pantalla)
 const BASE_FRONT = document.currentScript ? new URL(".", document.currentScript.src).href : "";
@@ -387,4 +387,66 @@ async function descargarReporteStockPorBodega() {
 // Descarga el comprobante PDF de un traslado
 async function descargarComprobanteTraslado(movimientoId) {
     await descargarArchivoDeLaApi("/traslados/" + movimientoId + "/pdf", "traslado_" + movimientoId + ".pdf");
+}
+
+
+// Trae la lista de productos con el nombre de su categoría y su unidad
+async function cargarProductosConNombres() {
+    return await pedirListaALaApi("/productos/lista");
+}
+
+
+// Envía los cambios de un producto existente
+async function editarProducto(productoId, datosProducto) {
+    const respuesta = await fetchApi(
+        "/productos/" + productoId,
+        {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(datosProducto)
+        }
+    );
+
+    const datosQueRespondioLaApi = await respuesta.json().catch(function () {
+        return null;
+    });
+
+    if (!respuesta.ok) {
+        throw new Error(leerMensajeDeError(datosQueRespondioLaApi));
+    }
+
+    return datosQueRespondioLaApi;
+}
+
+// Descarga el Excel de valor de inventario (endpoint /reportes/valor-inventario/excel)
+async function descargarReporteValorInventario() {
+    const hoy = new Date();
+    const fecha =
+        hoy.getFullYear() + "-" +
+        String(hoy.getMonth() + 1).padStart(2, "0") + "-" +
+        String(hoy.getDate()).padStart(2, "0");
+
+    await descargarArchivoDeLaApi("/reportes/valor-inventario/excel", "valor_inventario_" + fecha + ".xlsx");
+}
+
+// Descarga el Excel de productos agotados (endpoint /reportes/productos-agotados/excel)
+async function descargarReporteProductosAgotados() {
+    const hoy = new Date();
+    const fecha =
+        hoy.getFullYear() + "-" +
+        String(hoy.getMonth() + 1).padStart(2, "0") + "-" +
+        String(hoy.getDate()).padStart(2, "0");
+
+    await descargarArchivoDeLaApi("/reportes/productos-agotados/excel", "productos_agotados_" + fecha + ".xlsx");
+}
+
+// Descarga el Excel de movimientos entre bodegas (endpoint /reportes/movimientos-entre-bodegas/excel)
+async function descargarReporteMovimientosEntreBodegas() {
+    const hoy = new Date();
+    const fecha =
+        hoy.getFullYear() + "-" +
+        String(hoy.getMonth() + 1).padStart(2, "0") + "-" +
+        String(hoy.getDate()).padStart(2, "0");
+
+    await descargarArchivoDeLaApi("/reportes/movimientos-entre-bodegas/excel", "movimientos_entre_bodegas_" + fecha + ".xlsx");
 }
